@@ -1,0 +1,6 @@
+sensor:
+  - name: "Energy Reading"
+    state_topic: "smt/reading"
+    unit_of_measurement: "kWh"
+    state_class: total_increasing
+    device_class: energy
