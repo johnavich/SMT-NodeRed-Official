@@ -1,0 +1,13 @@
+- id: '1660605347130'
+  alias: LetsEncrypt
+  description: ''
+  trigger:
+  - platform: time
+    at: 00:00:00
+  condition: []
+  action:
+  - service: hassio.addon_start
+    data:
+      addon: core_letsencrypt
+  - service: shell_command.cert_check
+  mode: single
