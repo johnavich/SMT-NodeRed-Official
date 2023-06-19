@@ -19,7 +19,7 @@ Update: I have intgrated my SSL Configs a little better, so this process should 
 I have created a Catch Node that listens for Protocol Error on the main READ node. If it fails with this error, it tries with another READ node that is using an older certificate, and flips a switch in HA. I've added a new section that automatically writes an email, which includes an attachment of the new certificate to service@SMT. Until the certificate is updated, the system continues to use the old certificate. Once the new certificate is uploaded to SMT's backend nodes, the current READ node starts working, and flips that HA switch off.
 
 ## MQTT
-I send the rwa kWh to smt/reading via MQTT, I have an NQTT section in my configuration.yaml, that i have in its own file: mqtt: !include configs/mqtt.yaml
+I send the rwa kWh to smt/reading via MQTT, I have an MQTT section in my configuration.yaml, that i have in its own file: mqtt: !include configs/mqtt.yaml
 
 ## Delays
 I included a Manual Read, and Manual Request buttons, this is for the few times an error occurs that i have not already caught.  If you have suggestions or other catches, we can collectively update this repo.
