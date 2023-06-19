@@ -1,1 +1,1526 @@
-[{"id":"2794db7182b8c484","type":"inject","z":"f8297485.d32748","name":"Builid JSON","props":[{"p":"payload"},{"p":"topic","vt":"str"}],"repeat":"","crontab":"","once":true,"onceDelay":0.1,"topic":"","payload":"","payloadType":"date","x":90,"y":620,"wires":[["cbada3ec97e2ecbf"]]},{"id":"cbada3ec97e2ecbf","type":"credentials","z":"f8297485.d32748","name":"Credentials","props":[{"value":"username","type":"msg"},{"value":"password","type":"msg"},{"value":"esiid","type":"msg"},{"value":"meternumber","type":"msg"}],"x":250,"y":620,"wires":[["ce83626f90404d92"]]},{"id":"18bfa68f0764b928","type":"https-node","z":"f8297485.d32748","name":"Request Read","method":"POST","ret":"obj","paytoqs":"ignore","url":"https://services.smartmetertexas.net/odr/","tls":"262e83499f4a0db2","persist":false,"proxy":"","authType":"","senderr":false,"x":1000,"y":760,"wires":[["46b6bda4281d43ca","c3ad1d725c1486bc"]]},{"id":"11887f933b35c640","type":"base64","z":"f8297485.d32748","name":"","action":"","property":"payload","x":640,"y":580,"wires":[["d7c1dc8d3bf9e441"]]},{"id":"f648f72153ea96e0","type":"function","z":"f8297485.d32748","name":"Create Basic Auth","func":"\nmsg.payload=msg.username+\":\"+msg.password\n\nreturn msg;","outputs":1,"noerr":0,"initialize":"","finalize":"","libs":[],"x":470,"y":580,"wires":[["11887f933b35c640"]]},{"id":"58a494012c36e1f2","type":"change","z":"f8297485.d32748","name":"","rules":[{"t":"set","p":"basicauth","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":950,"y":580,"wires":[[]]},{"id":"d7c1dc8d3bf9e441","type":"template","z":"f8297485.d32748","name":"","field":"payload","fieldType":"msg","format":"handlebars","syntax":"mustache","template":"Basic {{{payload}}}","output":"str","x":780,"y":580,"wires":[["58a494012c36e1f2"]]},{"id":"36a80ba4bbfc77e8","type":"function","z":"f8297485.d32748","name":"Create Read Request JSON API Portal","func":"msg.payload = {\n  \"trans_id\": \"\",\n  \"requesterType\":\"RES\",\n  \"requestorID\":msg.username,\n  \"reportFormat\":\"JSON\",\n  //\"ESIIDMeterList\":[{\"esiid\": msg.esiid}],\n  //\"esiid\":[msg.esiid],\n  \"ESIID\": msg.esiid,\n  \"MeterNumber\": msg.meternumber,\n  \"deliveryMode\":\"API\",\n  \"SMTTermsandConditions\":\"Y\"\n};\nreturn msg;","outputs":1,"noerr":0,"initialize":"","finalize":"","libs":[],"x":530,"y":620,"wires":[["a5bf3f276099dadc"]]},{"id":"516ac1ce7f265c3a","type":"function","z":"f8297485.d32748","name":"Create Read Result JSON","func":"msg.payload = {\n  \"trans_id\":\"123\",\n  \"requestorID\": msg.username,\n  \"correlationId\":\"\",\n  \"SMTTermsandConditions\":\"Y\"\n};\nreturn msg;","outputs":1,"noerr":0,"initialize":"","finalize":"","libs":[],"x":500,"y":660,"wires":[["ec0f2ea92dc3a753"]]},{"id":"a5bf3f276099dadc","type":"change","z":"f8297485.d32748","name":"","rules":[{"t":"set","p":"readjson","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":950,"y":620,"wires":[[]]},{"id":"ec0f2ea92dc3a753","type":"change","z":"f8297485.d32748","name":"","rules":[{"t":"set","p":"resultjson","pt":"flow","to":"payload","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":950,"y":660,"wires":[[]]},{"id":"44901286a51a41a2","type":"inject","z":"f8297485.d32748","name":"Read Meter","props":[{"p":"payload"},{"p":"topic","vt":"str"}],"repeat":"60","crontab":"","once":true,"onceDelay":"5","topic":"","payload":"","payloadType":"date","x":90,"y":760,"wires":[["a8f15d236b6bc038"]]},{"id":"1c011e3881f6627e","type":"function","z":"f8297485.d32748","name":"Create Auth and Payload","func":"var auth=flow.get(\"basicauth\")\nvar body=flow.get(\"readjson\")\n\n/*\n\nmsg.payload = {\n  \"trans_id\": \"\",\n  \"requesterType\":\"RES\",\n  \"requestorID\":msg.username,\n  \"reportFormat\":\"JSON\",\n  //\"ESIIDMeterList\":[{\"esiid\": msg.esiid}],\n  //\"esiid\":[msg.esiid],\n  \"ESIID\": msg.esiid,\n  \"MeterNumber\": msg.meternumber,\n  \"deliveryMode\":\"API\",\n  \"SMTTermsandConditions\":\"Y\"\n};\n\n*/\n\n\n\nmsg.auth=auth\n//body.trans_id=Math.floor(Math.random()*100)\nbody.trans_id=\"123\"\n//body.startDate=\"11/19/2022\"\n//body.endDate=\"11/19/2022\"\n//body.version=\"L\"\n//body.readingType=\"A\"\nbody.deliveryMode=\"api\"\nmsg.payload=body\n\nreturn msg;","outputs":1,"noerr":0,"initialize":"","finalize":"","libs":[],"x":570,"y":760,"wires":[["cace0a1157c58eec","36d01fe5105891b1"]]},{"id":"cace0a1157c58eec","type":"debug","z":"f8297485.d32748","name":"Auth and Payload","active":false,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","statusVal":"","statusType":"auto","x":790,"y":720,"wires":[]},{"id":"46b6bda4281d43ca","type":"debug","z":"f8297485.d32748","name":"ODR Read","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","targetType":"msg","statusVal":"","statusType":"auto","x":1170,"y":720,"wires":[]},{"id":"36d01fe5105891b1","type":"change","z":"f8297485.d32748","name":"Apply HTTP Config","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload","tot":"msg"},{"t":"set","p":"headers.content-type","pt":"msg","to":"application/json","tot":"str"},{"t":"set","p":"headers.authorization","pt":"msg","to":"auth","tot":"msg"},{"t":"set","p":"headers.accept","pt":"msg","to":"applictaion/json","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":790,"y":760,"wires":[["18bfa68f0764b928","b8c6c7ee5fd221e6"]]},{"id":"b8c6c7ee5fd221e6","type":"debug","z":"f8297485.d32748","name":"Request","active":false,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","statusVal":"","statusType":"auto","x":980,"y":720,"wires":[]},{"id":"8c5365ade559a910","type":"https-node","z":"f8297485.d32748","name":"Get Reading","method":"POST","ret":"obj","paytoqs":"ignore","url":"https://services.smartmetertexas.net/odrstatus/","tls":"262e83499f4a0db2","persist":false,"proxy":"","authType":"","senderr":false,"x":490,"y":1000,"wires":[["08897231cdc297bc","d0c516539d20bd83"]]},{"id":"08897231cdc297bc","type":"switch","z":"f8297485.d32748","name":"Status Complete","property":"payload.statusCode","propertyType":"msg","rules":[{"t":"eq","v":"0","vt":"str"},{"t":"eq","v":"1","vt":"str"},{"t":"eq","v":"PEN","vt":"str"},{"t":"else"}],"checkall":"true","repair":false,"outputs":4,"x":690,"y":1000,"wires":[["170dc34975161c18"],["fbdaea1d913b9f58"],["73132d03df685463"],[]]},{"id":"ac3eb73f119c1fd8","type":"switch","z":"f8297485.d32748","d":true,"name":"Waiting for Response","property":"readrequested","propertyType":"flow","rules":[{"t":"eq","v":"1","vt":"str"}],"checkall":"true","repair":false,"outputs":1,"x":300,"y":900,"wires":[[]]},{"id":"170dc34975161c18","type":"change","z":"f8297485.d32748","name":"Not Waiting for Response","rules":[{"t":"set","p":"readrequested","pt":"flow","to":"0","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":930,"y":960,"wires":[["4764f1977af39d4a","da0a1615ed63b2a8","ee531fa264773536"]]},{"id":"e474cdf6e50006c3","type":"mqtt out","z":"f8297485.d32748","name":"MQTT: Send Reading","topic":"smt/reading","qos":"","retain":"true","respTopic":"","contentType":"","userProps":"","correl":"","expiry":"","broker":"9a7d5573.06f8d8","x":1380,"y":940,"wires":[]},{"id":"4764f1977af39d4a","type":"change","z":"f8297485.d32748","name":"Parse Reading","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.odrRead.registeredRead","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":1140,"y":940,"wires":[["e474cdf6e50006c3","ddbc0c557fbdbc13"]]},{"id":"d0c516539d20bd83","type":"debug","z":"f8297485.d32748","name":"Debug: Get Reading","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","statusVal":"","statusType":"auto","x":700,"y":900,"wires":[]},{"id":"ddbc0c557fbdbc13","type":"debug","z":"f8297485.d32748","name":"Debug: Last Reading","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"payload","targetType":"msg","x":1380,"y":900,"wires":[]},{"id":"f390e32dff331c39","type":"inject","z":"f8297485.d32748","name":"Manual Read","props":[{"p":"payload"},{"p":"topic","vt":"str"}],"repeat":"","crontab":"","once":false,"onceDelay":0.1,"topic":"","payload":"","payloadType":"date","x":90,"y":960,"wires":[["ac3eb73f119c1fd8","b7ca7efe1a6d81f3"]]},{"id":"b7ca7efe1a6d81f3","type":"function","z":"f8297485.d32748","name":"Create Auth and Payload","func":"var auth=flow.get(\"basicauth\")\nvar body=flow.get(\"resultjson\")\nvar coreid=flow.get(\"correlationId\")\nvar newmsg={}\n/*\n\nmsg.payload = {\n  \"tran_id\":\"123\",\n  \"requestorID\": msg.username,\n  \"correlationId\":\"\",\n  \"SMTTermsandConditions\":\"Y\"\n};\n\n*/\n\n\nnewmsg.headers={}\nnewmsg.headers.authorization=auth\nnewmsg.headers.accept=\"application/json\"\nbody.correlationId = coreid\n\nnewmsg.payload=body\n\nreturn newmsg;","outputs":1,"noerr":0,"initialize":"","finalize":"","libs":[],"x":270,"y":1000,"wires":[["05fd89b023aa6463","8c5365ade559a910"]]},{"id":"05fd89b023aa6463","type":"debug","z":"f8297485.d32748","name":"read payload","active":true,"tosidebar":true,"console":false,"tostatus":false,"complete":"true","targetType":"full","statusVal":"","statusType":"auto","x":490,"y":900,"wires":[]},{"id":"c3ad1d725c1486bc","type":"switch","z":"f8297485.d32748","name":"Request Good","property":"payload.statusReason","propertyType":"msg","rules":[{"t":"eq","v":"Request submitted successfully for further processing","vt":"str"}],"checkall":"true","repair":false,"outputs":1,"x":1180,"y":760,"wires":[["27f15112f6b3584b","6e3c978f0dcfefc9"]]},{"id":"27f15112f6b3584b","type":"change","z":"f8297485.d32748","name":"Waiting for Response","rules":[{"t":"set","p":"readrequested","pt":"flow","to":"1","tot":"str"},{"t":"set","p":"correlationId","pt":"flow","to":"payload.correlationId","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":1380,"y":760,"wires":[[]]},{"id":"04d3c9f6a6b5e1fa","type":"link out","z":"f8297485.d32748","name":"Begin Read requests","mode":"link","links":["a6a18f34ada711b7"],"x":1505,"y":720,"wires":[]},{"id":"a6a18f34ada711b7","type":"link in","z":"f8297485.d32748","name":"Begin Read loop","links":["04d3c9f6a6b5e1fa","4cb649929cb06813"],"x":125,"y":1000,"wires":[["b7ca7efe1a6d81f3"]]},{"id":"4cb649929cb06813","type":"link out","z":"f8297485.d32748","name":"Begin Read requests","mode":"link","links":["a6a18f34ada711b7"],"x":1075,"y":1080,"wires":[]},{"id":"6e3c978f0dcfefc9","type":"delay","z":"f8297485.d32748","name":"","pauseType":"delay","timeout":"10","timeoutUnits":"seconds","rate":"1","nbRateUnits":"1","rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"allowrate":false,"outputs":1,"x":1340,"y":720,"wires":[["04d3c9f6a6b5e1fa"]]},{"id":"73132d03df685463","type":"delay","z":"f8297485.d32748","name":"","pauseType":"delay","timeout":"5","timeoutUnits":"seconds","rate":"1","nbRateUnits":"1","rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"allowrate":false,"outputs":1,"x":880,"y":1080,"wires":[["4cb649929cb06813"]]},{"id":"da0a1615ed63b2a8","type":"change","z":"f8297485.d32748","name":"Parse Correlation ID","rules":[{"t":"set","p":"payload","pt":"msg","to":"correlationId","tot":"flow"}],"action":"","property":"","from":"","to":"","reg":false,"x":1160,"y":980,"wires":[["3e17692d745a9ca1"]]},{"id":"3e17692d745a9ca1","type":"mqtt out","z":"f8297485.d32748","name":"MQTT: Record CorrelationID","topic":"smt/correlationid","qos":"","retain":"","respTopic":"","contentType":"","userProps":"","correl":"","expiry":"","broker":"9a7d5573.06f8d8","x":1400,"y":980,"wires":[]},{"id":"ee531fa264773536","type":"change","z":"f8297485.d32748","d":true,"name":"Parse ODR Last Read","rules":[{"t":"set","p":"payload","pt":"msg","to":"payload.odrRead.readDate","tot":"msg"}],"action":"","property":"","from":"","to":"","reg":false,"x":1160,"y":860,"wires":[["0d29d9f0aa81174f"]]},{"id":"f9bcb34cdac886ea","type":"api-call-service","z":"f8297485.d32748","name":"Set Last Energy Read","server":"2fc58e7f.94a9f2","version":3,"debugenabled":false,"service_domain":"input_datetime","service":"set_datetime","entityId":"input_datetime.energy_last_read","data":"{\"datetime\":payload}","dataType":"jsonata","mergecontext":"","mustacheAltTags":false,"outputProperties":[],"queue":"none","x":1600,"y":860,"wires":[[]]},{"id":"0d29d9f0aa81174f","type":"moment","z":"f8297485.d32748","name":"","topic":"","input":"","inputType":"msg","inTz":"America/Chicago","adjAmount":0,"adjType":"days","adjDir":"add","format":"YYYY-MM-DD HH:mm:ss","locale":"C","output":"","outputType":"msg","outTz":"America/Chicago","x":1380,"y":860,"wires":[["f9bcb34cdac886ea"]]},{"id":"a8f15d236b6bc038","type":"function","z":"f8297485.d32748","name":"check if 55 minute","func":"var flowed = flow.get(\"readrequested\")\n\nif (flowed == 1){\n    return null\n}\n\nvar now = new Date()\n\n// @ts-ignore\n\n/*\nnode.warn(lastDate)\nnode.warn(chkTime)\nnode.warn(yes)\n*/\n\nvar newmsg = {}\nnewmsg.payload = \"true\"\nif(now.getMinutes() == 55){\n    return newmsg\n} else {\n    return null\n}\n//return msg;","outputs":1,"noerr":0,"initialize":"","finalize":"","libs":[],"x":270,"y":760,"wires":[["1c011e3881f6627e"]]},{"id":"5b561075b8bcbb91","type":"inject","z":"f8297485.d32748","name":"Manual Request","props":[{"p":"payload"},{"p":"topic","vt":"str"}],"repeat":"","crontab":"","once":false,"onceDelay":0.1,"topic":"","payload":"","payloadType":"date","x":100,"y":820,"wires":[["1c011e3881f6627e"]]},{"id":"fbdaea1d913b9f58","type":"change","z":"f8297485.d32748","name":"Not Waiting for Response","rules":[{"t":"set","p":"readrequested","pt":"flow","to":"0","tot":"str"}],"action":"","property":"","from":"","to":"","reg":false,"x":930,"y":1020,"wires":[["a6f5144cb8671bdf"]]},{"id":"6dd212e5f45ebb80","type":"link in","z":"f8297485.d32748","name":"Re-Request data from timeout","links":["dc655272ee62d703"],"x":165,"y":860,"wires":[["1c011e3881f6627e"]]},{"id":"a6f5144cb8671bdf","type":"delay","z":"f8297485.d32748","name":"","pauseType":"delay","timeout":"3","timeoutUnits":"minutes","rate":"1","nbRateUnits":"1","rateUnits":"second","randomFirst":"1","randomLast":"5","randomUnits":"seconds","drop":false,"allowrate":false,"outputs":1,"x":1120,"y":1020,"wires":[["dc655272ee62d703"]]},{"id":"dc655272ee62d703","type":"link out","z":"f8297485.d32748","name":"Failed Timeout","mode":"link","links":["6dd212e5f45ebb80"],"x":1315,"y":1020,"wires":[]},{"id":"ce83626f90404d92","type":"junction","z":"f8297485.d32748","x":340,"y":620,"wires":[["516ac1ce7f265c3a","f648f72153ea96e0","36a80ba4bbfc77e8"]]},{"id":"262e83499f4a0db2","type":"tls-config","name":"hassos.johnavich.me_LE_Manual","cert":"","key":"","ca":"","certname":"hassos.pem","keyname":"hassos.key","caname":"","servername":"","verifyservercert":true,"alpnprotocol":""},{"id":"9a7d5573.06f8d8","type":"mqtt-broker","name":"MQTT","broker":"127.0.0.1","port":"1883","clientid":"Node-Red","autoConnect":true,"usetls":false,"compatmode":false,"protocolVersion":"4","keepalive":"60","cleansession":true,"birthTopic":"","birthQos":"0","birthPayload":"","birthMsg":{},"closeTopic":"","closeQos":"0","closePayload":"","closeMsg":{},"willTopic":"","willQos":"0","willPayload":"","willMsg":{},"userProps":"","sessionExpiry":""},{"id":"2fc58e7f.94a9f2","type":"server","name":"Home Assistant","version":1,"addon":true,"rejectUnauthorizedCerts":true,"ha_boolean":"y|yes|true|on|home|open","connectionDelay":true,"cacheJson":true}]
+[
+  {
+    "id": "2794db7182b8c484",
+    "type": "inject",
+    "z": "f8297485.d32748",
+    "name": "Builid JSON",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": true,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 90,
+    "y": 620,
+    "wires": [
+      [
+        "cbada3ec97e2ecbf"
+      ]
+    ]
+  },
+  {
+    "id": "cbada3ec97e2ecbf",
+    "type": "credentials",
+    "z": "f8297485.d32748",
+    "name": "Credentials",
+    "props": [
+      {
+        "value": "username",
+        "type": "msg"
+      },
+      {
+        "value": "password",
+        "type": "msg"
+      },
+      {
+        "value": "esiid",
+        "type": "msg"
+      },
+      {
+        "value": "meternumber",
+        "type": "msg"
+      }
+    ],
+    "x": 250,
+    "y": 620,
+    "wires": [
+      [
+        "ce83626f90404d92"
+      ]
+    ]
+  },
+  {
+    "id": "18bfa68f0764b928",
+    "type": "https-node",
+    "z": "f8297485.d32748",
+    "name": "Request Read",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "https://services.smartmetertexas.net/odr/",
+    "tls": "dad747df7ecf9fda",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "senderr": false,
+    "x": 1000,
+    "y": 760,
+    "wires": [
+      [
+        "ab4c8fa4a8c4bfca",
+        "fe3a724f5d8b2ca8"
+      ]
+    ]
+  },
+  {
+    "id": "11887f933b35c640",
+    "type": "base64",
+    "z": "f8297485.d32748",
+    "name": "",
+    "action": "",
+    "property": "payload",
+    "x": 640,
+    "y": 580,
+    "wires": [
+      [
+        "d7c1dc8d3bf9e441"
+      ]
+    ]
+  },
+  {
+    "id": "f648f72153ea96e0",
+    "type": "function",
+    "z": "f8297485.d32748",
+    "name": "Create Basic Auth",
+    "func": "\nmsg.payload=msg.username+\":\"+msg.password\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 470,
+    "y": 580,
+    "wires": [
+      [
+        "11887f933b35c640"
+      ]
+    ]
+  },
+  {
+    "id": "58a494012c36e1f2",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "",
+    "rules": [
+      {
+        "t": "set",
+        "p": "basicauth",
+        "pt": "flow",
+        "to": "payload",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 950,
+    "y": 580,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "d7c1dc8d3bf9e441",
+    "type": "template",
+    "z": "f8297485.d32748",
+    "name": "",
+    "field": "payload",
+    "fieldType": "msg",
+    "format": "handlebars",
+    "syntax": "mustache",
+    "template": "Basic {{{payload}}}",
+    "output": "str",
+    "x": 780,
+    "y": 580,
+    "wires": [
+      [
+        "58a494012c36e1f2"
+      ]
+    ]
+  },
+  {
+    "id": "36a80ba4bbfc77e8",
+    "type": "function",
+    "z": "f8297485.d32748",
+    "name": "Create Read Request JSON API Portal",
+    "func": "msg.payload = {\n  \"trans_id\": \"\",\n  \"requesterType\":\"RES\",\n  \"requestorID\":msg.username,\n  \"reportFormat\":\"JSON\",\n  //\"ESIIDMeterList\":[{\"esiid\": msg.esiid}],\n  //\"esiid\":[msg.esiid],\n  \"ESIID\": msg.esiid,\n  \"MeterNumber\": msg.meternumber,\n  \"deliveryMode\":\"API\",\n  \"SMTTermsandConditions\":\"Y\"\n};\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 530,
+    "y": 620,
+    "wires": [
+      [
+        "a5bf3f276099dadc"
+      ]
+    ]
+  },
+  {
+    "id": "516ac1ce7f265c3a",
+    "type": "function",
+    "z": "f8297485.d32748",
+    "name": "Create Read Result JSON",
+    "func": "msg.payload = {\n  \"trans_id\":\"123\",\n  \"requestorID\": msg.username,\n  \"correlationId\":\"\",\n  \"SMTTermsandConditions\":\"Y\"\n};\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 500,
+    "y": 660,
+    "wires": [
+      [
+        "ec0f2ea92dc3a753"
+      ]
+    ]
+  },
+  {
+    "id": "a5bf3f276099dadc",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "",
+    "rules": [
+      {
+        "t": "set",
+        "p": "readjson",
+        "pt": "flow",
+        "to": "payload",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "esiid",
+        "pt": "flow",
+        "to": "esiid",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 940,
+    "y": 620,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "ec0f2ea92dc3a753",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "",
+    "rules": [
+      {
+        "t": "set",
+        "p": "resultjson",
+        "pt": "flow",
+        "to": "payload",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 950,
+    "y": 660,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "44901286a51a41a2",
+    "type": "inject",
+    "z": "f8297485.d32748",
+    "name": "Read Meter",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "60",
+    "crontab": "",
+    "once": true,
+    "onceDelay": "5",
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 90,
+    "y": 760,
+    "wires": [
+      [
+        "a8f15d236b6bc038"
+      ]
+    ]
+  },
+  {
+    "id": "1c011e3881f6627e",
+    "type": "function",
+    "z": "f8297485.d32748",
+    "name": "Create Auth and Payload",
+    "func": "var auth=flow.get(\"basicauth\")\nvar body=flow.get(\"readjson\")\n\n/*\n\nmsg.payload = {\n  \"trans_id\": \"\",\n  \"requesterType\":\"RES\",\n  \"requestorID\":msg.username,\n  \"reportFormat\":\"JSON\",\n  //\"ESIIDMeterList\":[{\"esiid\": msg.esiid}],\n  //\"esiid\":[msg.esiid],\n  \"ESIID\": msg.esiid,\n  \"MeterNumber\": msg.meternumber,\n  \"deliveryMode\":\"API\",\n  \"SMTTermsandConditions\":\"Y\"\n};\n\n*/\n\n\n\nmsg.auth=auth\n//body.trans_id=Math.floor(Math.random()*100)\nbody.trans_id=\"123\"\n//body.startDate=\"11/19/2022\"\n//body.endDate=\"11/19/2022\"\n//body.version=\"L\"\n//body.readingType=\"A\"\nbody.deliveryMode=\"api\"\nmsg.payload=body\n\nreturn msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 570,
+    "y": 760,
+    "wires": [
+      [
+        "cace0a1157c58eec",
+        "36d01fe5105891b1"
+      ]
+    ]
+  },
+  {
+    "id": "cace0a1157c58eec",
+    "type": "debug",
+    "z": "f8297485.d32748",
+    "name": "Auth and Payload",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 790,
+    "y": 720,
+    "wires": []
+  },
+  {
+    "id": "46b6bda4281d43ca",
+    "type": "debug",
+    "z": "f8297485.d32748",
+    "name": "ODR Read",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 1430,
+    "y": 720,
+    "wires": []
+  },
+  {
+    "id": "36d01fe5105891b1",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "Apply HTTP Config",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "payload",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers.content-type",
+        "pt": "msg",
+        "to": "application/json",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "headers.authorization",
+        "pt": "msg",
+        "to": "auth",
+        "tot": "msg"
+      },
+      {
+        "t": "set",
+        "p": "headers.accept",
+        "pt": "msg",
+        "to": "applictaion/json",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 790,
+    "y": 760,
+    "wires": [
+      [
+        "18bfa68f0764b928",
+        "b8c6c7ee5fd221e6"
+      ]
+    ]
+  },
+  {
+    "id": "b8c6c7ee5fd221e6",
+    "type": "debug",
+    "z": "f8297485.d32748",
+    "name": "Request",
+    "active": false,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 980,
+    "y": 720,
+    "wires": []
+  },
+  {
+    "id": "8c5365ade559a910",
+    "type": "https-node",
+    "z": "f8297485.d32748",
+    "name": "Get Reading",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "https://services.smartmetertexas.net/odrstatus/",
+    "tls": "dad747df7ecf9fda",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "senderr": true,
+    "x": 490,
+    "y": 1000,
+    "wires": [
+      [
+        "d0c516539d20bd83",
+        "34c5bf8674929155"
+      ]
+    ]
+  },
+  {
+    "id": "08897231cdc297bc",
+    "type": "switch",
+    "z": "f8297485.d32748",
+    "name": "Status Complete",
+    "property": "payload.statusCode",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "0",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "1",
+        "vt": "str"
+      },
+      {
+        "t": "eq",
+        "v": "PEN",
+        "vt": "str"
+      },
+      {
+        "t": "else"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 4,
+    "x": 850,
+    "y": 1000,
+    "wires": [
+      [
+        "170dc34975161c18"
+      ],
+      [
+        "fbdaea1d913b9f58"
+      ],
+      [
+        "73132d03df685463"
+      ],
+      []
+    ]
+  },
+  {
+    "id": "ac3eb73f119c1fd8",
+    "type": "switch",
+    "z": "f8297485.d32748",
+    "d": true,
+    "name": "Waiting for Response",
+    "property": "readrequested",
+    "propertyType": "flow",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "1",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 1,
+    "x": 300,
+    "y": 900,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "170dc34975161c18",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "Not Waiting for Response",
+    "rules": [
+      {
+        "t": "set",
+        "p": "readrequested",
+        "pt": "flow",
+        "to": "0",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1090,
+    "y": 960,
+    "wires": [
+      [
+        "4764f1977af39d4a",
+        "da0a1615ed63b2a8",
+        "ee531fa264773536"
+      ]
+    ]
+  },
+  {
+    "id": "e474cdf6e50006c3",
+    "type": "mqtt out",
+    "z": "f8297485.d32748",
+    "name": "MQTT: Send Reading",
+    "topic": "smt/reading",
+    "qos": "",
+    "retain": "true",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "9a7d5573.06f8d8",
+    "x": 1540,
+    "y": 940,
+    "wires": []
+  },
+  {
+    "id": "4764f1977af39d4a",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "Parse Reading",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "payload.odrRead.registeredRead",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1300,
+    "y": 940,
+    "wires": [
+      [
+        "e474cdf6e50006c3",
+        "ddbc0c557fbdbc13"
+      ]
+    ]
+  },
+  {
+    "id": "d0c516539d20bd83",
+    "type": "debug",
+    "z": "f8297485.d32748",
+    "name": "Debug: Get Reading",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 700,
+    "y": 900,
+    "wires": []
+  },
+  {
+    "id": "ddbc0c557fbdbc13",
+    "type": "debug",
+    "z": "f8297485.d32748",
+    "name": "Debug: Last Reading",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "payload",
+    "targetType": "msg",
+    "x": 1540,
+    "y": 900,
+    "wires": []
+  },
+  {
+    "id": "f390e32dff331c39",
+    "type": "inject",
+    "z": "f8297485.d32748",
+    "name": "Manual Read",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 90,
+    "y": 960,
+    "wires": [
+      [
+        "ac3eb73f119c1fd8",
+        "b7ca7efe1a6d81f3"
+      ]
+    ]
+  },
+  {
+    "id": "b7ca7efe1a6d81f3",
+    "type": "function",
+    "z": "f8297485.d32748",
+    "name": "Create Auth and Payload",
+    "func": "var auth=flow.get(\"basicauth\")\nvar body=flow.get(\"resultjson\")\nvar coreid=flow.get(\"correlationId\")\nvar newmsg={}\n/*\n\nmsg.payload = {\n  \"tran_id\":\"123\",\n  \"requestorID\": msg.username,\n  \"correlationId\":\"\",\n  \"SMTTermsandConditions\":\"Y\"\n};\n\n*/\n\n\nnewmsg.headers={}\nnewmsg.headers.authorization=auth\nnewmsg.headers.accept=\"application/json\"\nbody.correlationId = coreid\n\nnewmsg.payload=body\n\nreturn newmsg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 270,
+    "y": 1000,
+    "wires": [
+      [
+        "05fd89b023aa6463",
+        "8c5365ade559a910"
+      ]
+    ]
+  },
+  {
+    "id": "05fd89b023aa6463",
+    "type": "debug",
+    "z": "f8297485.d32748",
+    "name": "read payload",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 490,
+    "y": 900,
+    "wires": []
+  },
+  {
+    "id": "c3ad1d725c1486bc",
+    "type": "switch",
+    "z": "f8297485.d32748",
+    "name": "Request Good",
+    "property": "payload.statusReason",
+    "propertyType": "msg",
+    "rules": [
+      {
+        "t": "eq",
+        "v": "Request submitted successfully for further processing",
+        "vt": "str"
+      }
+    ],
+    "checkall": "true",
+    "repair": false,
+    "outputs": 1,
+    "x": 1440,
+    "y": 760,
+    "wires": [
+      [
+        "27f15112f6b3584b",
+        "6e3c978f0dcfefc9"
+      ]
+    ]
+  },
+  {
+    "id": "27f15112f6b3584b",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "Waiting for Response",
+    "rules": [
+      {
+        "t": "set",
+        "p": "readrequested",
+        "pt": "flow",
+        "to": "1",
+        "tot": "str"
+      },
+      {
+        "t": "set",
+        "p": "correlationId",
+        "pt": "flow",
+        "to": "payload.correlationId",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1640,
+    "y": 760,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "04d3c9f6a6b5e1fa",
+    "type": "link out",
+    "z": "f8297485.d32748",
+    "name": "Begin Read requests",
+    "mode": "link",
+    "links": [
+      "a6a18f34ada711b7"
+    ],
+    "x": 1765,
+    "y": 720,
+    "wires": []
+  },
+  {
+    "id": "a6a18f34ada711b7",
+    "type": "link in",
+    "z": "f8297485.d32748",
+    "name": "Begin Read loop",
+    "links": [
+      "04d3c9f6a6b5e1fa",
+      "4cb649929cb06813"
+    ],
+    "x": 125,
+    "y": 1000,
+    "wires": [
+      [
+        "b7ca7efe1a6d81f3"
+      ]
+    ]
+  },
+  {
+    "id": "4cb649929cb06813",
+    "type": "link out",
+    "z": "f8297485.d32748",
+    "name": "Begin Read requests",
+    "mode": "link",
+    "links": [
+      "a6a18f34ada711b7"
+    ],
+    "x": 1235,
+    "y": 1080,
+    "wires": []
+  },
+  {
+    "id": "6e3c978f0dcfefc9",
+    "type": "delay",
+    "z": "f8297485.d32748",
+    "name": "",
+    "pauseType": "delay",
+    "timeout": "10",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 1600,
+    "y": 720,
+    "wires": [
+      [
+        "04d3c9f6a6b5e1fa"
+      ]
+    ]
+  },
+  {
+    "id": "73132d03df685463",
+    "type": "delay",
+    "z": "f8297485.d32748",
+    "name": "",
+    "pauseType": "delay",
+    "timeout": "5",
+    "timeoutUnits": "seconds",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 1040,
+    "y": 1080,
+    "wires": [
+      [
+        "4cb649929cb06813"
+      ]
+    ]
+  },
+  {
+    "id": "da0a1615ed63b2a8",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "Parse Correlation ID",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "correlationId",
+        "tot": "flow"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1320,
+    "y": 980,
+    "wires": [
+      [
+        "3e17692d745a9ca1"
+      ]
+    ]
+  },
+  {
+    "id": "3e17692d745a9ca1",
+    "type": "mqtt out",
+    "z": "f8297485.d32748",
+    "name": "MQTT: Record CorrelationID",
+    "topic": "smt/correlationid",
+    "qos": "",
+    "retain": "",
+    "respTopic": "",
+    "contentType": "",
+    "userProps": "",
+    "correl": "",
+    "expiry": "",
+    "broker": "9a7d5573.06f8d8",
+    "x": 1560,
+    "y": 980,
+    "wires": []
+  },
+  {
+    "id": "ee531fa264773536",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "d": true,
+    "name": "Parse ODR Last Read",
+    "rules": [
+      {
+        "t": "set",
+        "p": "payload",
+        "pt": "msg",
+        "to": "payload.odrRead.readDate",
+        "tot": "msg"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1320,
+    "y": 860,
+    "wires": [
+      [
+        "0d29d9f0aa81174f"
+      ]
+    ]
+  },
+  {
+    "id": "f9bcb34cdac886ea",
+    "type": "api-call-service",
+    "z": "f8297485.d32748",
+    "name": "Set Last Energy Read",
+    "server": "2fc58e7f.94a9f2",
+    "version": 3,
+    "debugenabled": false,
+    "service_domain": "input_datetime",
+    "service": "set_datetime",
+    "entityId": "input_datetime.energy_last_read",
+    "data": "{\"datetime\":payload}",
+    "dataType": "jsonata",
+    "mergecontext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "x": 1760,
+    "y": 860,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "0d29d9f0aa81174f",
+    "type": "moment",
+    "z": "f8297485.d32748",
+    "name": "",
+    "topic": "",
+    "input": "",
+    "inputType": "msg",
+    "inTz": "America/Chicago",
+    "adjAmount": 0,
+    "adjType": "days",
+    "adjDir": "add",
+    "format": "YYYY-MM-DD HH:mm:ss",
+    "locale": "C",
+    "output": "",
+    "outputType": "msg",
+    "outTz": "America/Chicago",
+    "x": 1540,
+    "y": 860,
+    "wires": [
+      [
+        "f9bcb34cdac886ea"
+      ]
+    ]
+  },
+  {
+    "id": "a8f15d236b6bc038",
+    "type": "function",
+    "z": "f8297485.d32748",
+    "name": "check if 55 minute",
+    "func": "var flowed = flow.get(\"readrequested\")\n\nif (flowed == 1){\n    return null\n}\n\nvar now = new Date()\n\n// @ts-ignore\n\n/*\nnode.warn(lastDate)\nnode.warn(chkTime)\nnode.warn(yes)\n*/\n\nvar newmsg = {}\nnewmsg.payload = \"true\"\nif(now.getMinutes() == 55){\n    return newmsg\n} else {\n    return null\n}\n//return msg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 270,
+    "y": 760,
+    "wires": [
+      [
+        "1c011e3881f6627e"
+      ]
+    ]
+  },
+  {
+    "id": "5b561075b8bcbb91",
+    "type": "inject",
+    "z": "f8297485.d32748",
+    "name": "Manual Request",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 100,
+    "y": 820,
+    "wires": [
+      [
+        "1c011e3881f6627e"
+      ]
+    ]
+  },
+  {
+    "id": "fbdaea1d913b9f58",
+    "type": "change",
+    "z": "f8297485.d32748",
+    "name": "Not Waiting for Response",
+    "rules": [
+      {
+        "t": "set",
+        "p": "readrequested",
+        "pt": "flow",
+        "to": "0",
+        "tot": "str"
+      }
+    ],
+    "action": "",
+    "property": "",
+    "from": "",
+    "to": "",
+    "reg": false,
+    "x": 1090,
+    "y": 1020,
+    "wires": [
+      [
+        "a6f5144cb8671bdf"
+      ]
+    ]
+  },
+  {
+    "id": "6dd212e5f45ebb80",
+    "type": "link in",
+    "z": "f8297485.d32748",
+    "name": "Re-Request data from timeout",
+    "links": [
+      "dc655272ee62d703"
+    ],
+    "x": 165,
+    "y": 860,
+    "wires": [
+      [
+        "1c011e3881f6627e"
+      ]
+    ]
+  },
+  {
+    "id": "a6f5144cb8671bdf",
+    "type": "delay",
+    "z": "f8297485.d32748",
+    "name": "",
+    "pauseType": "delay",
+    "timeout": "3",
+    "timeoutUnits": "minutes",
+    "rate": "1",
+    "nbRateUnits": "1",
+    "rateUnits": "second",
+    "randomFirst": "1",
+    "randomLast": "5",
+    "randomUnits": "seconds",
+    "drop": false,
+    "allowrate": false,
+    "outputs": 1,
+    "x": 1280,
+    "y": 1020,
+    "wires": [
+      [
+        "dc655272ee62d703"
+      ]
+    ]
+  },
+  {
+    "id": "dc655272ee62d703",
+    "type": "link out",
+    "z": "f8297485.d32748",
+    "name": "Failed Timeout",
+    "mode": "link",
+    "links": [
+      "6dd212e5f45ebb80"
+    ],
+    "x": 1475,
+    "y": 1020,
+    "wires": []
+  },
+  {
+    "id": "baed2723c6274c43",
+    "type": "inject",
+    "z": "f8297485.d32748",
+    "name": "",
+    "props": [
+      {
+        "p": "payload"
+      },
+      {
+        "p": "topic",
+        "vt": "str"
+      }
+    ],
+    "repeat": "",
+    "crontab": "",
+    "once": false,
+    "onceDelay": 0.1,
+    "topic": "",
+    "payload": "",
+    "payloadType": "date",
+    "x": 80,
+    "y": 1080,
+    "wires": [
+      [
+        "528ad1c6387e7e6d"
+      ]
+    ]
+  },
+  {
+    "id": "e1705394e734fa99",
+    "type": "catch",
+    "z": "f8297485.d32748",
+    "name": "ProtoError2",
+    "scope": [
+      "8c5365ade559a910"
+    ],
+    "uncaught": false,
+    "x": 490,
+    "y": 1040,
+    "wires": [
+      [
+        "3fc4faa924b2ef37"
+      ]
+    ]
+  },
+  {
+    "id": "123ea31fc139a866",
+    "type": "https-node",
+    "z": "f8297485.d32748",
+    "name": "Request Read",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "https://services.smartmetertexas.net/odr/",
+    "tls": "262e83499f4a0db2",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "senderr": false,
+    "x": 1180,
+    "y": 800,
+    "wires": [
+      [
+        "ab4c8fa4a8c4bfca",
+        "75b9ecbc5fe760d7"
+      ]
+    ]
+  },
+  {
+    "id": "3dbb58287814bc8c",
+    "type": "catch",
+    "z": "f8297485.d32748",
+    "name": "ProtoError",
+    "scope": [
+      "18bfa68f0764b928"
+    ],
+    "uncaught": false,
+    "x": 980,
+    "y": 800,
+    "wires": [
+      [
+        "123ea31fc139a866"
+      ]
+    ]
+  },
+  {
+    "id": "3fc4faa924b2ef37",
+    "type": "https-node",
+    "z": "f8297485.d32748",
+    "name": "Get Reading",
+    "method": "POST",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "https://services.smartmetertexas.net/odrstatus/",
+    "tls": "262e83499f4a0db2",
+    "persist": false,
+    "proxy": "",
+    "authType": "",
+    "senderr": true,
+    "x": 650,
+    "y": 1040,
+    "wires": [
+      [
+        "34c5bf8674929155"
+      ]
+    ]
+  },
+  {
+    "id": "335f588d0c6ceabc",
+    "type": "catch",
+    "z": "f8297485.d32748",
+    "name": "SMT Error",
+    "scope": [
+      "08897231cdc297bc",
+      "3fc4faa924b2ef37"
+    ],
+    "uncaught": false,
+    "x": 640,
+    "y": 1080,
+    "wires": [
+      [
+        "fbdaea1d913b9f58"
+      ]
+    ]
+  },
+  {
+    "id": "528ad1c6387e7e6d",
+    "type": "file in",
+    "z": "f8297485.d32748",
+    "name": "",
+    "filename": "/ssl/fullchain.pem",
+    "filenameType": "str",
+    "format": "",
+    "chunk": false,
+    "sendError": false,
+    "encoding": "none",
+    "allProps": false,
+    "x": 250,
+    "y": 1120,
+    "wires": [
+      [
+        "16d4575ad72eefe9"
+      ]
+    ]
+  },
+  {
+    "id": "752ce38662105084",
+    "type": "e-mail",
+    "z": "f8297485.d32748",
+    "server": "smtp.email.com",
+    "port": "465",
+    "secure": true,
+    "tls": false,
+    "name": "",
+    "dname": "smartmeter",
+    "x": 770,
+    "y": 1120,
+    "wires": []
+  },
+  {
+    "id": "0416bad7d987664d",
+    "type": "debug",
+    "z": "f8297485.d32748",
+    "name": "email",
+    "active": true,
+    "tosidebar": true,
+    "console": false,
+    "tostatus": false,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 750,
+    "y": 1160,
+    "wires": []
+  },
+  {
+    "id": "16d4575ad72eefe9",
+    "type": "function",
+    "z": "f8297485.d32748",
+    "name": "create email",
+    "func": "var newmsg={};\nnewmsg.attachments={\n    filename:\"fullchain.pem\",\n    content:msg.payload\n}\nnewmsg.topic=\"Please update the SSL Certificate for USERID\"\nnewmsg.payload=\"Please add the updated certificate for user USERID\"\nnewmsg.from=\"email@email.com\"\nnewmsg.to =\"support@smartmetertexas.com\"\n\nreturn newmsg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 430,
+    "y": 1120,
+    "wires": [
+      [
+        "e8da4d102f3c1c92"
+      ]
+    ]
+  },
+  {
+    "id": "b61ec74181381fed",
+    "type": "server-state-changed",
+    "z": "f8297485.d32748",
+    "name": "Current Certificate Expired",
+    "server": "2fc58e7f.94a9f2",
+    "version": 3,
+    "exposeToHomeAssistant": false,
+    "haConfig": [
+      {
+        "property": "name",
+        "value": ""
+      },
+      {
+        "property": "icon",
+        "value": ""
+      }
+    ],
+    "entityidfilter": "input_boolean.cert_updated",
+    "entityidfiltertype": "exact",
+    "outputinitially": false,
+    "state_type": "habool",
+    "haltifstate": "",
+    "halt_if_type": "str",
+    "halt_if_compare": "is",
+    "outputs": 1,
+    "output_only_on_state_change": true,
+    "for": 0,
+    "forType": "num",
+    "forUnits": "minutes",
+    "ignorePrevStateNull": true,
+    "ignorePrevStateUnknown": true,
+    "ignorePrevStateUnavailable": true,
+    "ignoreCurrentStateUnknown": true,
+    "ignoreCurrentStateUnavailable": true,
+    "outputProperties": [
+      {
+        "property": "data",
+        "propertyType": "msg",
+        "value": "",
+        "valueType": "eventData"
+      }
+    ],
+    "x": 110,
+    "y": 1220,
+    "wires": [
+      [
+        "7af027db55004582"
+      ]
+    ]
+  },
+  {
+    "id": "7af027db55004582",
+    "type": "file in",
+    "z": "f8297485.d32748",
+    "name": "",
+    "filename": "/ssl/fullchain.pem",
+    "filenameType": "str",
+    "format": "",
+    "chunk": false,
+    "sendError": false,
+    "encoding": "none",
+    "allProps": false,
+    "x": 330,
+    "y": 1220,
+    "wires": [
+      [
+        "d84304cf3f201861"
+      ]
+    ]
+  },
+  {
+    "id": "d84304cf3f201861",
+    "type": "function",
+    "z": "f8297485.d32748",
+    "name": "create email",
+    "func": "var newmsg={};\nnewmsg.attachments={\n    filename:\"fullchain.pem\",\n    content:msg.payload\n}\nnewmsg.topic=\"Please update the SSL Certificate for USERID\"\nnewmsg.payload=\"Please add the updated certificate for user USERID\"\nnewmsg.from=\"email@email.com\"\nnewmsg.to =\"support@smartmetertexas.com\"\n\nreturn newmsg;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 530,
+    "y": 1220,
+    "wires": [
+      [
+        "0416bad7d987664d",
+        "752ce38662105084"
+      ]
+    ]
+  },
+  {
+    "id": "fe3a724f5d8b2ca8",
+    "type": "api-call-service",
+    "z": "f8297485.d32748",
+    "name": "Current Certificate good",
+    "server": "2fc58e7f.94a9f2",
+    "version": 3,
+    "debugenabled": false,
+    "service_domain": "input_boolean",
+    "service": "turn_off",
+    "entityId": "input_boolean.cert_updated",
+    "data": "",
+    "dataType": "jsonata",
+    "mergecontext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "x": 1210,
+    "y": 720,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "75b9ecbc5fe760d7",
+    "type": "api-call-service",
+    "z": "f8297485.d32748",
+    "name": "Current Certificate bad",
+    "server": "2fc58e7f.94a9f2",
+    "version": 3,
+    "debugenabled": false,
+    "service_domain": "input_boolean",
+    "service": "turn_on",
+    "entityId": "input_boolean.cert_updated",
+    "data": "",
+    "dataType": "jsonata",
+    "mergecontext": "",
+    "mustacheAltTags": false,
+    "outputProperties": [],
+    "queue": "none",
+    "x": 1400,
+    "y": 800,
+    "wires": [
+      []
+    ]
+  },
+  {
+    "id": "ce83626f90404d92",
+    "type": "junction",
+    "z": "f8297485.d32748",
+    "x": 340,
+    "y": 620,
+    "wires": [
+      [
+        "516ac1ce7f265c3a",
+        "f648f72153ea96e0",
+        "36a80ba4bbfc77e8"
+      ]
+    ]
+  },
+  {
+    "id": "ab4c8fa4a8c4bfca",
+    "type": "junction",
+    "z": "f8297485.d32748",
+    "x": 1320,
+    "y": 760,
+    "wires": [
+      [
+        "46b6bda4281d43ca",
+        "c3ad1d725c1486bc"
+      ]
+    ]
+  },
+  {
+    "id": "34c5bf8674929155",
+    "type": "junction",
+    "z": "f8297485.d32748",
+    "x": 740,
+    "y": 1000,
+    "wires": [
+      [
+        "08897231cdc297bc"
+      ]
+    ]
+  },
+  {
+    "id": "e8da4d102f3c1c92",
+    "type": "junction",
+    "z": "f8297485.d32748",
+    "x": 520,
+    "y": 1120,
+    "wires": [
+      [
+        "752ce38662105084",
+        "0416bad7d987664d"
+      ]
+    ]
+  },
+  {
+    "id": "dad747df7ecf9fda",
+    "type": "tls-config",
+    "name": "LetsEncrypt Certificate",
+    "cert": "/ssl/fullchain.pem",
+    "key": "/ssl/privkey.pem",
+    "ca": "",
+    "certname": "",
+    "keyname": "",
+    "caname": "",
+    "servername": "",
+    "verifyservercert": true,
+    "alpnprotocol": ""
+  },
+  {
+    "id": "9a7d5573.06f8d8",
+    "type": "mqtt-broker",
+    "name": "MQTT",
+    "broker": "127.0.0.1",
+    "port": "1883",
+    "clientid": "Node-Red",
+    "autoConnect": true,
+    "usetls": false,
+    "compatmode": false,
+    "protocolVersion": "4",
+    "keepalive": "60",
+    "cleansession": true,
+    "birthTopic": "",
+    "birthQos": "0",
+    "birthPayload": "",
+    "birthMsg": {},
+    "closeTopic": "",
+    "closeQos": "0",
+    "closePayload": "",
+    "closeMsg": {},
+    "willTopic": "",
+    "willQos": "0",
+    "willPayload": "",
+    "willMsg": {},
+    "userProps": "",
+    "sessionExpiry": ""
+  },
+  {
+    "id": "2fc58e7f.94a9f2",
+    "type": "server",
+    "name": "Home Assistant",
+    "version": 1,
+    "addon": true,
+    "rejectUnauthorizedCerts": true,
+    "ha_boolean": "y|yes|true|on|home|open",
+    "connectionDelay": true,
+    "cacheJson": true
+  },
+  {
+    "id": "262e83499f4a0db2",
+    "type": "tls-config",
+    "name": "LetsEncrypt Certificate - OLD",
+    "cert": "/media/fullchain.pem",
+    "key": "/media/privkey.pem",
+    "ca": "",
+    "certname": "hassos.pem",
+    "keyname": "hassos.key",
+    "caname": "",
+    "servername": "",
+    "verifyservercert": true,
+    "alpnprotocol": ""
+  }
+]
