@@ -1,0 +1,3 @@
+automation: !include automations.yaml
+shell_command: !include shell.yaml
+input_boolean: !include bool.yaml
