@@ -13,10 +13,12 @@ The Credentials node contains all the information you need to update, including 
 You will need to add node-red-contrib-credentials to your palette.
 
 ## SSL Certificate
-The SSL Certificate is in all of the POST requests, so you will need to update the TLS Configuration section of both requests. I recommend NOT using the default LE integration paths, (/ssl/fullchain.pem), but instead uploading the files manually.  I use the LE integration, and the VSCode integration to get the contents of /ssl.  When creating a new tls-config, you will need to upload both the cert and the private key, but only send the cert to SMT.
+~~The SSL Certificate is in all of the POST requests, so you will need to update the TLS Configuration section of both requests. I recommend NOT using the default LE integration paths, (/ssl/fullchain.pem), but instead uploading the files manually.  I use the LE integration, and the VSCode integration to get the contents of /ssl.  When creating a new tls-config, you will need to upload both the cert and the private key, but only send the cert to SMT.~~
 
-Update: I have intgrated my SSL Configs a little better, so this process should be "mostly" self-sufficient.  I have created a new config for SSL that allows me to email a certificate to SMT automatically, without having to manually get the certificate from VSCode.
-I have created a Catch Node that listens for Protocol Error on the main READ node. If it fails with this error, it tries with another READ node that is using an older certificate, and flips a switch in HA. I've added a new section that automatically writes an email, which includes an attachment of the new certificate to service@SMT. Until the certificate is updated, the system continues to use the old certificate. Once the new certificate is uploaded to SMT's backend nodes, the current READ node starts working, and flips that HA switch off.
+~~Update: I have intgrated my SSL Configs a little better, so this process should be "mostly" self-sufficient.  I have created a new config for SSL that allows me to email a certificate to SMT automatically, without having to manually get the certificate from VSCode.
+I have created a Catch Node that listens for Protocol Error on the main READ node. If it fails with this error, it tries with another READ node that is using an older certificate, and flips a switch in HA. I've added a new section that automatically writes an email, which includes an attachment of the new certificate to service@SMT. Until the certificate is updated, the system continues to use the old certificate. Once the new certificate is uploaded to SMT's backend nodes, the current READ node starts working, and flips that HA switch off.~~
+
+Update: SMT has changed their API guidelines to use JWT (JSON Web Tokens) instead of SSL Client-side authentication.  This greatly simplifies the process, and only requires that you contact SMT to give them your IP address from the system you intend to make requests from.
 
 ## MQTT
 I send the rwa kWh to smt/reading via MQTT, I have an MQTT section in my configuration.yaml, that i have in its own file: mqtt: !include configs/mqtt.yaml
