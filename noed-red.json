@@ -1,51 +1,5 @@
 [
     {
-        "id": "516ac1ce7f265c3a",
-        "type": "function",
-        "z": "f8297485.d32748",
-        "name": "Create Read Result JSON",
-        "func": "msg.payload = {\n  \"trans_id\":\"123\",\n  \"requestorID\": msg.username,\n  \"correlationId\":\"\",\n  \"SMTTermsandConditions\":\"Y\"\n};\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [
-        ],
-        "x": 600,
-        "y": 660,
-        "wires": [
-            [
-                "ec0f2ea92dc3a753"
-            ]
-        ]
-    },
-    {
-        "id": "ec0f2ea92dc3a753",
-        "type": "change",
-        "z": "f8297485.d32748",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "resultjson",
-                "pt": "flow",
-                "to": "payload",
-                "tot": "msg"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 1050,
-        "y": 660,
-        "wires": [
-            [
-            ]
-        ]
-    },
-    {
         "id": "fc56e1b3356d7679",
         "type": "cronplus",
         "z": "f8297485.d32748",
@@ -178,6 +132,7 @@
         "y": 780,
         "wires": [
             [
+                "965dd4b2c9b3ecad"
             ]
         ]
     },
@@ -224,7 +179,7 @@
         "id": "4d39d6196f3e0e16",
         "type": "change",
         "z": "f8297485.d32748",
-        "name": "Apply HTTP Config",
+        "name": "Apply HTTP Config v2",
         "rules": [
             {
                 "t": "set",
@@ -260,7 +215,7 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 490,
+        "x": 500,
         "y": 860,
         "wires": [
             [
@@ -273,7 +228,7 @@
         "id": "122230bd673ab65b",
         "type": "https-node",
         "z": "f8297485.d32748",
-        "name": "Request Read",
+        "name": "Request Read v2",
         "method": "POST",
         "ret": "obj",
         "paytoqs": "ignore",
@@ -283,7 +238,7 @@
         "proxy": "",
         "authType": "",
         "senderr": false,
-        "x": 700,
+        "x": 710,
         "y": 860,
         "wires": [
             [
@@ -438,7 +393,7 @@
         "links": [
             "b6b56756423c5d0d"
         ],
-        "x": 805,
+        "x": 895,
         "y": 780,
         "wires": [
         ]
@@ -886,6 +841,48 @@
         "wires": [
             [
                 "a6779166c07768aa"
+            ]
+        ]
+    },
+    {
+        "id": "965dd4b2c9b3ecad",
+        "type": "delay",
+        "z": "f8297485.d32748",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "2",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 800,
+        "y": 780,
+        "wires": [
+            [
+                "25e3c010bffebc60"
+            ]
+        ]
+    },
+    {
+        "id": "ce66e4e963866c84",
+        "type": "catch",
+        "z": "f8297485.d32748",
+        "name": "",
+        "scope": [
+            "122230bd673ab65b"
+        ],
+        "uncaught": false,
+        "x": 70,
+        "y": 940,
+        "wires": [
+            [
+                "c0b72d366335872b"
             ]
         ]
     },
